@@ -4,7 +4,7 @@
 	let tabSet = 0;
 </script>
 
-<TabGroup>
+<TabGroup class="w-80 my-10 py-2 px-5 border rounded">
 	<Tab bind:group={tabSet} name="createTab" value={0}>
 		<span>Create</span>
 	</Tab>

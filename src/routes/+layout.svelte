@@ -22,7 +22,7 @@
 	<!-- (sidebarRight) -->
 	<!-- (pageHeader) -->
 	<!-- Router Slot -->
-	<div class="page-slot w-2/3 border rounded flex justify-center content-center">
+	<div class="page-slot w-screen flex justify-center content-center">
 		<slot />
 	</div>
 	<!-- ---- / ---- -->
