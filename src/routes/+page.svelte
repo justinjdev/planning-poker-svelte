@@ -1,13 +1,24 @@
-<!-- YOU CAN DELETE EVERYTHING IN THIS PAGE -->
+<script lant="ts">
+	import { Tab, TabGroup } from '@skeletonlabs/skeleton';
 
-<div class="container h-full mx-auto flex justify-center items-center">
-	<div class="space-y-5">
-		<h1 class="h1">Let's get cracking bones!</h1>
-		<p>Start by exploring:</p>
-		<ul>
-			<li><code class="code">/src/routes/+layout.svelte</code> - barebones layout, the CSS import order is critical!</li>
-			<li><code class="code">/src/app.postcss</code> - minimal css to make the page full screen, may not be relevant for your project</li>
-			<li><code class="code">/src/routes/+page.svelte</code> - this page, you can replace the contents</li>
-		</ul>
-	</div>
-</div>
+	let tabSet = 0;
+</script>
+
+<TabGroup>
+	<Tab bind:group={tabSet} name="createTab" value={0}>
+		<span>Create</span>
+	</Tab>
+	<Tab bind:group={tabSet} name="joinTab" value={1}>Join</Tab>
+
+	<!-- Tab Panels --->
+	<svelte:fragment slot="panel">
+		<label class="label">
+			<span>Room Name:</span>
+			<input class="input" type="text" placeholder="Room Name" />
+		</label>
+		<button type="button" class="btn variant-filled my-1">
+			<i class="fa-solid fa-rocket" />
+			<span>Go!</span>
+		</button>
+	</svelte:fragment>
+</TabGroup>
