@@ -4,6 +4,10 @@
 	import { user } from '$lib/stores/user';
 	import { Tab, TabGroup } from '@skeletonlabs/skeleton';
 
+	export let data;
+	let { supabase } = data;
+	$: ({ supabase } = data);
+
 	let tabSet: number = 0;
 	let roomName: string = '';
 
@@ -17,9 +21,13 @@
 		roomName = e.target.value;
 	};
 
+	const signInAnonymously = async () => {
+		await supabase.auth.signInAnonymously();
+	};
+
 	// check if need to anon signin
 	if (!$user) {
-		// signInAnonymously();
+		supabase.auth.signInAnonymously();
 	} else {
 		console.log('User is logged in as ' + $user.name);
 	}

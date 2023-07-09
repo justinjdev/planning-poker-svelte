@@ -6,14 +6,10 @@
 	// Most of your app wide CSS should be put in this file
 	import '../app.postcss';
 
-	import { AppShell, AppBar } from '@skeletonlabs/skeleton';
 	import Footer from '$lib/components/Footer.svelte';
-
-	import { Modal } from '@skeletonlabs/skeleton';
-	import { supabaseAuth } from '$lib/supabase';
-
-	import { invalidateAll } from '$app/navigation';
+	import { AppBar, AppShell, Modal } from '@skeletonlabs/skeleton';
 	import { onMount } from 'svelte';
+	import { invalidate } from '$app/navigation';
 
 	export let data;
 
