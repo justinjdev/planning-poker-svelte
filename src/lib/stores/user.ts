@@ -1,15 +1,14 @@
 import type { Participant } from '$lib/interfaces';
-import { writable } from 'svelte/store';
+import { localStorageStore } from '@skeletonlabs/skeleton';
+import type { Writable } from 'svelte/store';
 
 function userStore(startWith: Participant) {
 	const unsubscribe = () => {};
 
-	const { subscribe, set, update } = writable<Participant>(startWith, (set) => {
-		set(startWith);
-
-		// unsubscribe will be handled by the snapshot unsubscribe
-		// return () => unsubscribe();
-	});
+	const { subscribe, set, update }: Writable<Participant> = localStorageStore(
+		'userStore',
+		startWith
+	);
 
 	return {
 		subscribe,
