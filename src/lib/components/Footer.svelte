@@ -18,15 +18,12 @@
 			<a href="https://500px.com/p/hock3ydud3?view=photos"><i class="fa-brands fa-500px" /></a>
 		</li>
 	</ul>
-	<p class="footer-txt text-xs opacity-50">
+	<p class="text-xs opacity-50">
 		Built with <a href="https://www.skeleton.dev/">Skeleton (Sveltekit & Tailwind)</a> and a dash of
 		♥
 	</p>
-	<p class="footer-txt text-xs opacity-50">Copyright © 2023 Justin Jones</p>
+	<p class="text-xs opacity-50">Copyright © 2023 Justin Jones</p>
 </footer>
 
 <style>
-	.footer-txt {
-		opacity: 50%;
-	}
 </style>
