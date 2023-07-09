@@ -17,24 +17,19 @@
 	<svelte:fragment slot="header">
 		<AppBar>
 			<svelte:fragment slot="lead">
-				<h1 class="h1 text-center w-screen uppercase flex">Planning Poker</h1>
+				<h1 class="h1 text-center justify-center w-screen uppercase flex">Planning Poker</h1>
 			</svelte:fragment>
 		</AppBar>
 	</svelte:fragment>
 	<!-- <svelte:fragment slot="sidebarLeft">Sidebar Left</svelte:fragment> -->
-	<!-- (sidebarRight) -->
-	<!-- (pageHeader) -->
-	<!-- Router Slot -->
+
 	<div class="page-slot w-screen flex justify-center content-center">
 		<slot />
 	</div>
-	<!-- ---- / ---- -->
+
+	<!-- ---- footer ---- -->
 	<svelte:fragment slot="pageFooter"><Footer /></svelte:fragment>
-	<!-- (footer) -->
 </AppShell>
 
 <style>
-	h1 {
-		justify-content: center;
-	}
 </style>

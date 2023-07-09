@@ -1,11 +1,16 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { rooms } from '$lib/stores/rooms';
+	import { user } from '$lib/stores/user';
 	import { Tab, TabGroup } from '@skeletonlabs/skeleton';
 
 	let tabSet: number = 0;
 	let roomName: string = '';
 
 	const handleSubmit = () => {
-		console.log('Form submitted with ' + roomName);
+		if (rooms.hasRoom(roomName)) {
+			goto(`/room/${roomName}`);
+		}
 	};
 
 	const handleEntry = (e: Event) => {
@@ -13,6 +18,11 @@
 	};
 
 	// check if need to anon signin
+	if (!$user) {
+		// signInAnonymously();
+	} else {
+		console.log('User is logged in as ' + $user.name);
+	}
 </script>
 
 <TabGroup class="w-80 my-10 py-2 px-5 border rounded">
@@ -24,8 +34,14 @@
 	<!-- Tab Panels --->
 	<svelte:fragment slot="panel">
 		<label class="label">
-			<span>Room Name:</span>
-			<input class="input" type="text" placeholder="Room Name" on:change={handleEntry} />
+			<span>Room {tabSet === 0 ? 'Name' : 'ID'}:</span>
+			<input
+				class="input"
+				type="text"
+				placeholder="Room {tabSet === 0 ? 'Name' : 'ID'}"
+				required
+				on:change={handleEntry}
+			/>
 		</label>
 		<button type="button" class="btn variant-filled my-1" on:click|preventDefault={handleSubmit}>
 			<i class="fa-solid fa-rocket" />

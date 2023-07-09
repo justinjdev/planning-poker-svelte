@@ -13,7 +13,7 @@ function roomStore(startWith: RoomMap = {}) {
 				r[pageId].votes[key] = 0;
 			}
 
-			r[pageId].avg = -1;
+			r[pageId].score = -1;
 
 			return r;
 		});
@@ -32,12 +32,17 @@ function roomStore(startWith: RoomMap = {}) {
 		});
 	};
 
+	const hasRoom = (pageId: string) => {
+		return get(rooms).hasOwnProperty(pageId);
+	};
+
 	return {
 		subscribe,
 		set,
 		update,
 		reset,
-		calculateScore
+		calculateScore,
+		hasRoom
 	};
 }
 
@@ -47,7 +52,7 @@ export const rooms = roomStore({
 		name: 'Test Room',
 		admin: 'testu1',
 		score: -1,
-		voting: true,
+		voting: false,
 		participants: [
 			{
 				id: 'testu1',

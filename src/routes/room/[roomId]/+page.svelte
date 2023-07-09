@@ -4,11 +4,10 @@
 	import { user } from '$lib/stores/user';
 	import { ProgressBar } from '@skeletonlabs/skeleton';
 	import { modalStore } from '@skeletonlabs/skeleton';
-	import type { ModalSettings, ModalComponent } from '@skeletonlabs/skeleton';
+	import type { ModalSettings } from '@skeletonlabs/skeleton';
 
-	let pageId = $page.params.roomId;
-	let options = ['1', '2', '3', '5', '8', '13', '1000', '0'];
-	let votescore: number = 0;
+	const pageId = $page.params.roomId;
+	const options = ['1', '2', '3', '5', '8', '13', '1000', '0'];
 
 	const resetVotes = () => {
 		rooms.reset(pageId);
