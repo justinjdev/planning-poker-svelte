@@ -1,15 +1,32 @@
-import type { Room } from '$lib/interfaces';
-import { writable } from 'svelte/store';
+import type { Room, RoomMap } from '$lib/interfaces';
+import { get, writable } from 'svelte/store';
 
-function roomStore() {
+function roomStore(startWith: RoomMap = {}) {
 	const unsubscribe = () => {};
-	const { subscribe, set, update } = writable<{ [key: string]: Room }>({});
+	const { subscribe, set, update } = writable<RoomMap>(startWith, (set) => {
+		set(startWith);
+	});
 
 	const reset = (pageId: string) => {
 		rooms.update((r) => {
 			for (const key in r[pageId].votes) {
 				r[pageId].votes[key] = 0;
 			}
+
+			r[pageId].avg = -1;
+
+			return r;
+		});
+	};
+
+	const calculateScore = (pageId: string) => {
+		rooms.update((r) => {
+			const tallyingScores = Object.values(r[pageId].votes).filter((v) => v > 0);
+
+			let voteAvg =
+				tallyingScores.reduce((sum, current) => sum + current, 0) / tallyingScores.length;
+
+			r[pageId].score = voteAvg;
 
 			return r;
 		});
@@ -19,8 +36,42 @@ function roomStore() {
 		subscribe,
 		set,
 		update,
-		reset
+		reset,
+		calculateScore
 	};
 }
 
-export const rooms = roomStore();
+export const rooms = roomStore({
+	test: {
+		id: 'test',
+		name: 'Test Room',
+		admin: 'testu1',
+		score: -1,
+		voting: true,
+		participants: [
+			{
+				id: 'testu1',
+				name: 'Test User',
+				color: '#3f3f3f',
+				abstaining: false
+			},
+			{
+				id: 'testu2',
+				name: 'Test User 2',
+				color: '#000000',
+				abstaining: true
+			},
+			{
+				id: 'testu3',
+				name: 'Test User 3',
+				color: '#3f7a5e',
+				abstaining: false
+			}
+		],
+		votes: {
+			testu1: 5,
+			testu2: 8,
+			testu3: 0
+		}
+	}
+});

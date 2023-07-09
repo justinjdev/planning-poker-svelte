@@ -8,8 +8,11 @@
 
 	import { AppShell, AppBar } from '@skeletonlabs/skeleton';
 	import Footer from '$lib/components/Footer.svelte';
+
+	import { Modal } from '@skeletonlabs/skeleton';
 </script>
 
+<Modal />
 <AppShell>
 	<svelte:fragment slot="header">
 		<AppBar>

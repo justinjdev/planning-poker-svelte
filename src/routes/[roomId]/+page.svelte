@@ -3,46 +3,12 @@
 	import { rooms } from '$lib/stores/rooms';
 	import { user } from '$lib/stores/user';
 	import { ProgressBar } from '@skeletonlabs/skeleton';
+	import { modalStore } from '@skeletonlabs/skeleton';
+	import type { ModalSettings, ModalComponent } from '@skeletonlabs/skeleton';
 
 	let pageId = $page.params.roomId;
 	let options = ['1', '2', '3', '5', '8', '13', '1000', '0'];
-
-	rooms.update((r) => {
-		if (!(pageId in r)) {
-			r[pageId] = {
-				id: 'test',
-				name: 'Test Room',
-				admin: 'testu1',
-				voting: true,
-				participants: [
-					{
-						id: 'testu1',
-						name: 'Test User',
-						color: '#3f3f3f',
-						abstaining: false
-					},
-					{
-						id: 'testu2',
-						name: 'Test User 2',
-						color: '#000000',
-						abstaining: false
-					},
-					{
-						id: 'testu3',
-						name: 'Test User 3',
-						color: '#3f7a5e',
-						abstaining: false
-					}
-				],
-				votes: {
-					testu1: 5,
-					testu2: 8,
-					testu3: 0
-				}
-			};
-		}
-		return r;
-	});
+	let votescore: number = 0;
 
 	const resetVotes = () => {
 		rooms.reset(pageId);
@@ -61,9 +27,20 @@
 			resetVotes();
 			thisRoom.voting = true;
 		} else {
-			//calc avg?
 			thisRoom.voting = false;
+			rooms.calculateScore(pageId);
+			console.log($rooms[pageId].score);
+			modalStore.trigger(modalSettings($rooms[pageId].score));
 		}
+	};
+
+	const modalSettings = (score: number): ModalSettings => {
+		return {
+			type: 'alert',
+			title: 'Voting Results!',
+			body: score + ''
+			// image: 'https://i.imgur.com/WOgTG96.gif'
+		};
 	};
 
 	$: thisRoom = $rooms[pageId];
@@ -73,7 +50,7 @@
 	<h1 class="text-center">Welcome to {thisRoom.name}</h1>
 
 	{#if thisRoom.admin === $user.id}
-		<section class="admin-pane">
+		<section class="admin-pane text-center">
 			<button class="btn variant-filled my-1" on:click={toggleVoting}>
 				<span
 					><i
@@ -93,18 +70,10 @@
 
 	<div class="voting-pane" />
 
-	<section class="results py-4 px-1">
-		<ProgressBar
-			label="Progress Bar"
-			value={Object.values(thisRoom.votes).filter((v) => v > 0).length}
-			max={thisRoom.participants.filter((p) => !p.abstaining).length}
-		/>
-	</section>
-
 	<section class="voting-pane text-center">
 		{#each options as option}
 			<button
-				class="btn btn-sm border-2 variant-filled my-1"
+				class="btn btn-sm border-2 variant-filled my-1 mx-[0.5px]"
 				on:click={() => handleVote(option)}
 				class:border-green-400={thisRoom.votes[$user.id] === parseInt(option)}
 				disabled={!thisRoom.voting}
@@ -112,6 +81,14 @@
 				<span>{option === '0' ? '?' : option}</span>
 			</button>
 		{/each}
+	</section>
+
+	<section class="results py-4 px-1">
+		<ProgressBar
+			label="Progress Bar"
+			value={Object.values(thisRoom.votes).filter((v) => v > 0).length}
+			max={thisRoom.participants.filter((p) => !p.abstaining).length}
+		/>
 	</section>
 
 	<section class="participants flex justify-center items-center">
