@@ -36,9 +36,9 @@
 	const modalSettings = (score: number): ModalSettings => {
 		return {
 			type: 'alert',
-			title: 'Voting Results!',
-			body: score + ''
-			// image: 'https://i.imgur.com/WOgTG96.gif'
+			title: 'Results',
+			body: score + '',
+			buttonTextCancel: 'Neat!'
 		};
 	};
 
