@@ -2,20 +2,23 @@
 	import { page } from '$app/stores';
 	import { rooms } from '$lib/stores/rooms';
 	import { user } from '$lib/stores/user';
-	import { ProgressBar } from '@skeletonlabs/skeleton';
-	import { modalStore } from '@skeletonlabs/skeleton';
+	import { supabaseClient, trackRoom } from '$lib/supabase';
 	import type { ModalSettings } from '@skeletonlabs/skeleton';
+	import { ProgressBar, modalStore } from '@skeletonlabs/skeleton';
+	import type { RealtimeChannel } from '@supabase/supabase-js';
+	import { onMount } from 'svelte';
+	import { onDestroy } from 'svelte/types/runtime/internal/lifecycle';
 
-	const pageId = $page.params.roomId;
+	const roomId = $page.params.roomId;
 	const options = ['1', '2', '3', '5', '8', '13', '1000', '0'];
 
 	const resetVotes = () => {
-		rooms.reset(pageId);
+		rooms.reset(roomId);
 	};
 
 	const handleVote = (v: string) => {
 		rooms.update((r) => {
-			r[pageId].votes[$user.id] = parseInt(v);
+			r[roomId].votes[$user.id] = parseInt(v);
 
 			return r;
 		});
@@ -27,9 +30,9 @@
 			thisRoom.voting = true;
 		} else {
 			thisRoom.voting = false;
-			rooms.calculateScore(pageId);
-			console.log($rooms[pageId].score);
-			modalStore.trigger(modalSettings($rooms[pageId].score));
+			rooms.calculateScore(roomId);
+			console.log($rooms[roomId].score);
+			modalStore.trigger(modalSettings($rooms[roomId].score));
 		}
 	};
 
@@ -42,7 +45,20 @@
 		};
 	};
 
-	$: thisRoom = $rooms[pageId];
+	// HANDLING CHANNELS
+	let roomChannel: RealtimeChannel;
+
+	onMount(() => {
+		roomChannel = trackRoom(supabaseClient, roomId);
+	});
+
+	onDestroy(() => {
+		roomChannel.unsubscribe();
+	});
+
+	// END HANDLING CHANNELS
+
+	$: thisRoom = $rooms[roomId];
 </script>
 
 <div class="room-wrapper">

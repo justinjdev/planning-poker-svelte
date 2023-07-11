@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { rooms } from '$lib/stores/rooms';
-	import { user } from '$lib/stores/user';
 	import { Tab, TabGroup } from '@skeletonlabs/skeleton';
 
 	let tabSet: number = 0;
@@ -16,13 +15,6 @@
 	const handleEntry = (e: Event) => {
 		roomName = e.target.value;
 	};
-
-	// check if need to anon signin
-	if (!$user) {
-		// signInAnonymously();
-	} else {
-		console.log('User is logged in as ' + $user.name);
-	}
 </script>
 
 <TabGroup class="w-80 my-10 py-2 px-5 border rounded">

@@ -1,13 +1,20 @@
 import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public';
 import { createClient } from '@supabase/supabase-js';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { RealtimeChannel, SupabaseClient } from '@supabase/supabase-js';
 import { user } from './stores/user';
 import { get } from 'svelte/store';
+import type { Participant } from './interfaces';
 
 export const supabaseClient = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
 
-const trackRoom = (supabaseClient: SupabaseClient, channelName: string) => {
-	const roomChannel = supabaseClient.channel(channelName);
+export const trackRoom = (supabaseClient: SupabaseClient, channelName: string): RealtimeChannel => {
+	const roomChannel = supabaseClient.channel(channelName, {
+		config: {
+			presence: {
+				key: get(user).id
+			}
+		}
+	});
 
 	roomChannel
 		.on('presence', { event: 'sync' }, () => {
@@ -25,8 +32,20 @@ const trackRoom = (supabaseClient: SupabaseClient, channelName: string) => {
 		})
 		.subscribe(async (status) => {
 			if (status === 'SUBSCRIBED') {
+				// not sure if this part actually works
 				const presenceTrackStatus = await roomChannel.track(get(user));
 				console.log(presenceTrackStatus);
 			}
 		});
+
+	return roomChannel;
+};
+
+const updateRoom = async (roomChannel: RealtimeChannel, update: Participant) => {
+	roomChannel.subscribe(async (status) => {
+		if (status === 'SUBSCRIBED') {
+			const presenceTrackStatus = await roomChannel.track(update);
+			console.log(presenceTrackStatus);
+		}
+	});
 };
