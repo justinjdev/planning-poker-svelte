@@ -2,35 +2,34 @@ import type { Participant } from '$lib/interfaces';
 import { localStorageStore } from '@skeletonlabs/skeleton';
 import type { Writable } from 'svelte/store';
 
-function userStore(startWith: Participant) {
+function userStore(userId?: string, startWith?: Participant) {
 	const unsubscribe = () => {};
 
-	const { subscribe, set, update }: Writable<Participant> = localStorageStore(
-		'userStore',
-		startWith
-	);
-
-	const initUser = (uuid: string) => {
+	const initUser = (uuid: string | undefined) => {
 		const newUser = {
 			id: uuid,
 			name: `user#${uuid}`,
-			color: '#3f3f3f',
+			color: randomColor(),
 			abstaining: false
 		} as Participant;
 
-		set(newUser);
+		return newUser;
 	};
+
+	const { subscribe, set, update }: Writable<Participant> = localStorageStore(
+		'userStore',
+		initUser(userId || startWith?.id || crypto.randomUUID())
+	);
 
 	return {
 		subscribe,
-		set,
-		update
+		update,
+		unsubscribe
 	};
 }
 
-export const user = userStore({
-	id: 'testu1',
-	name: 'Test User',
-	color: '#3f3f3f',
-	abstaining: false
-});
+const randomColor = (): string => {
+	return '#' + Math.floor(Math.random() * 16777215).toString(16);
+};
+
+export const user = userStore();
