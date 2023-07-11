@@ -10,6 +10,17 @@ function userStore(startWith: Participant) {
 		startWith
 	);
 
+	const initUser = (uuid: string) => {
+		const newUser = {
+			id: uuid,
+			name: `user#${uuid}`,
+			color: '#3f3f3f',
+			abstaining: false
+		} as Participant;
+
+		set(newUser);
+	};
+
 	return {
 		subscribe,
 		set,
