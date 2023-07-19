@@ -1,6 +1,7 @@
 import { get } from 'svelte/store';
 import type {
 	LocalState,
+	ManagedState,
 	Participant,
 	RoomState,
 	RoomSync,
@@ -9,10 +10,11 @@ import type {
 } from './interfaces';
 import { RealtimeChannelHandler } from './realtime';
 import { user } from './stores/user';
+import { stateStore, type StateStore } from './stores/state';
 
 /**
  * what needs to happen in rooms?
- *  [ ] voting
+ *  [x] voting
  *  [x] user updates
  *
  * vote triggers:
@@ -30,42 +32,33 @@ import { user } from './stores/user';
  */
 export class RoomImpl {
 	private channelHandler: RealtimeChannelHandler;
-	private selfEvents: boolean;
 	private userId: string;
 
-	public localSettings: LocalState;
+	public managedState: StateStore;
 
-	public roomState: RoomState;
-
-	constructor(roomId: string, initUser: Participant, selfEvents: boolean) {
-		this.selfEvents = selfEvents;
+	constructor(roomId: string, initUser: Participant) {
 		this.userId = initUser.id;
 
 		// instantiate channel handler
 		this.channelHandler = new RealtimeChannelHandler(roomId, initUser, false);
 
-		this.roomState = {
-			voting: false,
-			name: roomId
-		};
-
-		this.localSettings = {
-			tally: 0,
-			resetVote: false
-		};
+		this.managedState = stateStore();
 
 		// subscribe to events
 		this.channelHandler
 			// state sync (voting)
 			.handleBroadcastEvent<RoomSync>('roomSync', (state) => {
+				console.log('room sync', state);
 				this.sync(state);
 			})
 			// transmit vote
 			.handleBroadcastEvent<UserVote>('userVote', ({ userId, vote }) => {
+				console.log('user vote', userId, vote);
 				this.channelHandler.users().updateUser(userId, { vote: vote });
 			})
 			// name change, color change, abstain
 			.handleBroadcastEvent<UserUpdate>('userUpdate', (payload) => {
+				console.log('user update', payload);
 				this.channelHandler.users().updateUser(payload.userId, payload);
 			})
 			// name change, color change, abstain
@@ -76,16 +69,16 @@ export class RoomImpl {
 						return state;
 					});
 				}
-				this.roomState.voting = true;
+				this.managedState.updateState({ voting: true });
 			})
 			// name change, color change, abstain
 			.handleBroadcastEvent('tally', () => {
 				// this is when we tally
-				this.roomState.voting = false;
 
 				const userList = Object.values(get(this.channelHandler.users()));
-				this.localSettings.tally =
-					userList.reduce((sum, current) => sum + current, 0) / userList.length;
+				const newTally = userList.reduce((sum, current) => sum + current, 0) / userList.length;
+
+				this.managedState.updateState({ tally: newTally, voting: false });
 			});
 	}
 
@@ -95,7 +88,7 @@ export class RoomImpl {
 	 * @param roomState state of the room
 	 */
 	private sync(roomState: RoomState) {
-		this.roomState = roomState;
+		this.managedState.updateState(roomState);
 	}
 
 	/**
@@ -113,8 +106,8 @@ export class RoomImpl {
 	public triggerSync() {
 		this.channelHandler.broadcastEvent<RoomSync>('roomSync', {
 			userId: this.userId,
-			voting: this.roomState.voting,
-			name: this.roomState.name
+			voting: get(this.managedState).voting,
+			name: get(this.managedState).name
 		});
 	}
 
@@ -145,9 +138,11 @@ export class RoomImpl {
 	 *  Toggle the room's voting status
 	 */
 	public toggleVoting() {
-		this.roomState.voting = !this.roomState.voting;
-		if (!this.roomState.voting) {
-			this.localSettings.tally = 0;
+		this.managedState.updateState({ voting: !get(this.managedState).voting });
+
+		console.log('toggling voting', get(this.managedState).voting);
+		if (!get(this.managedState).voting && !get(this.managedState).resetVote) {
+			this.managedState.updateState({ tally: 0 });
 		}
 	}
 
@@ -158,8 +153,8 @@ export class RoomImpl {
 		this.channelHandler.leaveChannel();
 	}
 
-	public state(): RoomState & LocalState {
-		return { ...this.roomState, ...this.localSettings };
+	public state(): StateStore {
+		return this.managedState;
 	}
 
 	public users() {

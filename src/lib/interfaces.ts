@@ -24,6 +24,8 @@ export type BroadcastEvent = {
 	userId: string;
 };
 
+export type ManagedState = RoomState & LocalState;
+
 // a room sync will sync all room state
 export type RoomSync = RoomState & BroadcastEvent;
 

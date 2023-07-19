@@ -29,7 +29,7 @@
 	};
 
 	onMount(() => {
-		roomHandler = new RoomImpl(roomId, $user, false);
+		roomHandler = new RoomImpl(roomId, $user);
 		roomUsers = roomHandler.users();
 	});
 
@@ -38,22 +38,24 @@
 			roomHandler.leave();
 		}
 	});
+
+	$: roomState = roomHandler?.state();
 </script>
 
 <div class="room-wrapper">
 	{#if roomHandler}
-		<h1 class="text-center">Welcome to {roomHandler.state().name}</h1>
+		<h1 class="text-center">Welcome to {$roomState.name}</h1>
 		<!-- not handling admin toggles for now -->
 		<section class="admin-pane text-center">
 			<button class="btn variant-filled my-1" on:click={toggleVoting}>
 				<span
 					><i
 						class="fa-solid"
-						class:fa-play={!roomHandler.state().voting}
-						class:fa-stop={roomHandler.state().voting}
+						class:fa-play={!$roomState.voting}
+						class:fa-stop={$roomState.voting}
 					/></span
 				>
-				<span>{roomHandler.state().voting ? 'Stop' : 'Start'} Voting</span>
+				<span>{$roomState.voting ? 'Stop' : 'Start'} Voting</span>
 			</button>
 		</section>
 
@@ -65,7 +67,7 @@
 					class="btn btn-sm border-2 variant-filled my-1 mx-[0.5px]"
 					on:click={() => handleVote(option)}
 					class:border-green-400={$user.vote === parseInt(option)}
-					disabled={!roomHandler.state().voting}
+					disabled={!$roomState.voting}
 				>
 					<span>{option === '0' ? '?' : option}</span>
 				</button>
@@ -82,7 +84,7 @@
 	</section> -->
 
 		<section class="participants flex justify-center items-center">
-			{#each Object.values($roomUsers) as participant}
+			{#each [...$roomUsers] as [_, participant]}
 				<div
 					class="card p-4 border-[1.5px] border-[{participant.color}] m-1"
 					class:border-dotted={participant.abstaining}
@@ -91,7 +93,7 @@
 					<section class="p-4 text-center">
 						{#if participant.abstaining}
 							<i class="fa-solid fa-user-xmark" />
-						{:else if roomHandler.state().voting}
+						{:else if $roomState.voting}
 							<i class="fa-solid fa-bolt-lightning animate-bounce" />
 						{:else}
 							{participant.vote === 0 ? '?' : participant.vote}
