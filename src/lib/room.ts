@@ -63,7 +63,7 @@ export class RoomImpl {
 			})
 			// name change, color change, abstain
 			.handleBroadcastEvent('startVote', () => {
-				if (true) {
+				if (get(this.managedState).resetVote) {
 					user.update((state) => {
 						state.vote = -1;
 						return state;
@@ -73,7 +73,7 @@ export class RoomImpl {
 			})
 			// name change, color change, abstain
 			.handleBroadcastEvent('tally', () => {
-				// this is when we tally
+				// this is when we tally & end voting
 
 				const userList = Object.values(get(this.channelHandler.users()));
 				const newTally = userList.reduce((sum, current) => sum + current, 0) / userList.length;
@@ -140,9 +140,14 @@ export class RoomImpl {
 	public toggleVoting() {
 		this.managedState.updateState({ voting: !get(this.managedState).voting });
 
-		console.log('toggling voting', get(this.managedState).voting);
 		if (!get(this.managedState).voting && !get(this.managedState).resetVote) {
 			this.managedState.updateState({ tally: 0 });
+		}
+
+		if (get(this.managedState).voting) {
+			this.channelHandler.broadcastEvent('startVote', { userId: this.userId });
+		} else {
+			this.channelHandler.broadcastEvent('tally', { userId: this.userId });
 		}
 	}
 
