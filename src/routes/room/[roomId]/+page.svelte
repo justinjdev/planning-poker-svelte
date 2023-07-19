@@ -1,39 +1,22 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { rooms } from '$lib/stores/rooms';
-	import { user } from '$lib/stores/user';
-	import { supabaseClient, trackRoom } from '$lib/supabase';
+	import { RoomImpl } from '$lib/room';
+	import { user, type UserMap } from '$lib/stores/user';
 	import type { ModalSettings } from '@skeletonlabs/skeleton';
-	import { ProgressBar, modalStore } from '@skeletonlabs/skeleton';
-	import type { RealtimeChannel } from '@supabase/supabase-js';
-	import { onMount } from 'svelte';
-	import { onDestroy } from 'svelte/types/runtime/internal/lifecycle';
+	import { onDestroy, onMount } from 'svelte';
 
 	const roomId = $page.params.roomId;
 	const options = ['1', '2', '3', '5', '8', '13', '1000', '0'];
 
-	const resetVotes = () => {
-		rooms.reset(roomId);
-	};
+	let roomHandler: RoomImpl;
+	let roomUsers: UserMap;
 
 	const handleVote = (v: string) => {
-		rooms.update((r) => {
-			r[roomId].votes[$user.id] = parseInt(v);
-
-			return r;
-		});
+		roomHandler.sendVote(parseInt(v));
 	};
 
 	const toggleVoting = () => {
-		if (!thisRoom.voting) {
-			resetVotes();
-			thisRoom.voting = true;
-		} else {
-			thisRoom.voting = false;
-			rooms.calculateScore(roomId);
-			console.log($rooms[roomId].score);
-			modalStore.trigger(modalSettings($rooms[roomId].score));
-		}
+		roomHandler.toggleVoting();
 	};
 
 	const modalSettings = (score: number): ModalSettings => {
@@ -45,70 +28,61 @@
 		};
 	};
 
-	// HANDLING CHANNELS
-	let roomChannel: RealtimeChannel;
-
 	onMount(() => {
-		roomChannel = trackRoom(supabaseClient, roomId);
+		roomHandler = new RoomImpl(roomId, $user, false);
+		roomUsers = roomHandler.users();
 	});
 
 	onDestroy(() => {
-		roomChannel.unsubscribe();
+		if (roomHandler) {
+			roomHandler.leave();
+		}
 	});
-
-	// END HANDLING CHANNELS
-
-	$: thisRoom = $rooms[roomId];
 </script>
 
 <div class="room-wrapper">
-	<h1 class="text-center">Welcome to {thisRoom.name}</h1>
-
-	{#if thisRoom.admin === $user.id}
+	{#if roomHandler}
+		<h1 class="text-center">Welcome to {roomHandler.state().name}</h1>
+		<!-- not handling admin toggles for now -->
 		<section class="admin-pane text-center">
 			<button class="btn variant-filled my-1" on:click={toggleVoting}>
 				<span
 					><i
 						class="fa-solid"
-						class:fa-play={!thisRoom.voting}
-						class:fa-stop={thisRoom.voting}
+						class:fa-play={!roomHandler.state().voting}
+						class:fa-stop={roomHandler.state().voting}
 					/></span
 				>
-				<span>{thisRoom.voting ? 'Stop' : 'Start'} Voting</span>
-			</button>
-			<button class="btn variant-filled my-1" on:click={resetVotes}>
-				<span><i class="fa-solid" /></span>
-				<span>Reset Voting</span>
+				<span>{roomHandler.state().voting ? 'Stop' : 'Start'} Voting</span>
 			</button>
 		</section>
-	{/if}
 
-	<div class="voting-pane" />
+		<div class="voting-pane" />
 
-	<section class="voting-pane text-center">
-		{#each options as option}
-			<button
-				class="btn btn-sm border-2 variant-filled my-1 mx-[0.5px]"
-				on:click={() => handleVote(option)}
-				class:border-green-400={thisRoom.votes[$user.id] === parseInt(option)}
-				disabled={!thisRoom.voting}
-			>
-				<span>{option === '0' ? '?' : option}</span>
-			</button>
-		{/each}
-	</section>
+		<section class="voting-pane text-center">
+			{#each options as option}
+				<button
+					class="btn btn-sm border-2 variant-filled my-1 mx-[0.5px]"
+					on:click={() => handleVote(option)}
+					class:border-green-400={$user.vote === parseInt(option)}
+					disabled={!roomHandler.state().voting}
+				>
+					<span>{option === '0' ? '?' : option}</span>
+				</button>
+			{/each}
+		</section>
 
-	<section class="results py-4 px-1">
+		<!-- this only works if the votes are reset -->
+		<!-- <section class="results py-4 px-1">
 		<ProgressBar
 			label="Progress Bar"
 			value={Object.values(thisRoom.votes).filter((v) => v > 0).length}
 			max={thisRoom.participants.filter((p) => !p.abstaining).length}
 		/>
-	</section>
+	</section> -->
 
-	<section class="participants flex justify-center items-center">
-		{#if thisRoom}
-			{#each thisRoom.participants as participant}
+		<section class="participants flex justify-center items-center">
+			{#each Object.values($roomUsers) as participant}
 				<div
 					class="card p-4 border-[1.5px] border-[{participant.color}] m-1"
 					class:border-dotted={participant.abstaining}
@@ -117,16 +91,16 @@
 					<section class="p-4 text-center">
 						{#if participant.abstaining}
 							<i class="fa-solid fa-user-xmark" />
-						{:else if thisRoom.voting}
+						{:else if roomHandler.state().voting}
 							<i class="fa-solid fa-bolt-lightning animate-bounce" />
 						{:else}
-							{thisRoom.votes[participant.id] === 0 ? '?' : thisRoom.votes[participant.id]}
+							{participant.vote === 0 ? '?' : participant.vote}
 						{/if}
 					</section>
 				</div>
 			{/each}
-		{/if}
-	</section>
+		</section>
+	{/if}
 </div>
 
 <style>

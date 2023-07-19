@@ -1,15 +1,12 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { rooms } from '$lib/stores/rooms';
 	import { Tab, TabGroup } from '@skeletonlabs/skeleton';
 
 	let tabSet: number = 0;
 	let roomName: string = '';
 
 	const handleSubmit = () => {
-		if (rooms.hasRoom(roomName)) {
-			goto(`/room/${roomName}`);
-		}
+		goto(`/room/${roomName}`);
 	};
 
 	const handleEntry = (e: Event) => {
