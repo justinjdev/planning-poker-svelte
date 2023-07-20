@@ -84,7 +84,7 @@ export class RoomImpl {
 	 * update the current user
 	 * @param user current user w/updates
 	 */
-	public updateCurrentUser(user: Participant) {
+	public updateCurrentUser(user: Partial<Participant>) {
 		this.channelHandler.updateSelf(user);
 	}
 
