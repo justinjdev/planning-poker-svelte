@@ -5,19 +5,11 @@ import { stateStore, type StateStore } from './stores/state';
 import { user } from './stores/user';
 
 /**
- * what needs to happen in rooms?
- *  [x] voting
- *  [x] user updates
- *
  * vote triggers:
- *  [ ] abstaining/not
  *  [ ] tally
- *  [ ] reset
  *
  * user updates:
- *  [x] join
- *  [x] leave
- *  [x] name change
+ *  [ ] name change
  *  [ ] color change
  *  [ ] abstain
  *  [ ] vote
@@ -126,7 +118,8 @@ export class RoomImpl {
 	public toggleAbstain() {
 		this.channelHandler.updateSelf({
 			id: this.userId,
-			abstaining: !get(user).abstaining
+			abstaining: !get(user).abstaining,
+			vote: -1
 		});
 	}
 

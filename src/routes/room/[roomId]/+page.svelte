@@ -21,6 +21,10 @@
 		roomHandler.toggleVoting();
 	};
 
+	const toggleAbstain = () => {
+		roomHandler.toggleAbstain();
+	};
+
 	const modalSettings = (score: number): ModalSettings => {
 		return {
 			type: 'alert',
@@ -57,6 +61,16 @@
 					/></span
 				>
 				<span>{$roomState.voting ? 'Stop' : 'Start'} Voting</span>
+			</button>
+			<button class="btn variant-filled my-1" on:click={toggleAbstain}>
+				<span
+					><i
+						class="fa-solid"
+						class:fa-user-xmark={!$user.abstaining}
+						class:fa-bolt-lightning={$user.abstaining}
+					/></span
+				>
+				<span>{$user.abstaining ? 'Unabstain' : 'Abstain'}</span>
 			</button>
 		</section>
 
