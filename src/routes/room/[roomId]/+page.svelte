@@ -1,36 +1,28 @@
 <script lang="ts">
+	import type { StateStore } from '$lib/stores/state';
 	import { page } from '$app/stores';
-	import { rooms } from '$lib/stores/rooms';
-	import { user } from '$lib/stores/user';
-	import { ProgressBar } from '@skeletonlabs/skeleton';
-	import { modalStore } from '@skeletonlabs/skeleton';
+	import { RoomImpl } from '$lib/room';
+	import { user, type UserMap } from '$lib/stores/user';
 	import type { ModalSettings } from '@skeletonlabs/skeleton';
+	import { onDestroy, onMount } from 'svelte';
 
-	const pageId = $page.params.roomId;
-	const options = ['1', '2', '3', '5', '8', '13', '1000', '0'];
+	const roomId = $page.params.roomId;
+	const options = ['1', '2', '3', '5', '8', '13', '1000', '0'] as const;
 
-	const resetVotes = () => {
-		rooms.reset(pageId);
-	};
+	let roomHandler: RoomImpl;
+	let roomUsers: UserMap;
+	let roomState: StateStore;
 
 	const handleVote = (v: string) => {
-		rooms.update((r) => {
-			r[pageId].votes[$user.id] = parseInt(v);
-
-			return r;
-		});
+		roomHandler.sendVote(parseInt(v));
 	};
 
 	const toggleVoting = () => {
-		if (!thisRoom.voting) {
-			resetVotes();
-			thisRoom.voting = true;
-		} else {
-			thisRoom.voting = false;
-			rooms.calculateScore(pageId);
-			console.log($rooms[pageId].score);
-			modalStore.trigger(modalSettings($rooms[pageId].score));
-		}
+		roomHandler.toggleVoting();
+	};
+
+	const toggleAbstain = () => {
+		roomHandler.toggleAbstain();
 	};
 
 	const modalSettings = (score: number): ModalSettings => {
@@ -42,57 +34,72 @@
 		};
 	};
 
-	$: thisRoom = $rooms[pageId];
+	onMount(() => {
+		roomHandler = new RoomImpl(roomId, $user);
+		roomUsers = roomHandler.users();
+		roomState = roomHandler.state();
+	});
+
+	onDestroy(() => {
+		if (roomHandler) {
+			roomHandler.leave();
+		}
+	});
 </script>
 
 <div class="room-wrapper">
-	<h1 class="text-center">Welcome to {thisRoom.name}</h1>
-
-	{#if thisRoom.admin === $user.id}
+	{#if roomHandler}
+		<h1 class="text-center">Welcome to {$roomState.name}</h1>
+		<!-- not handling admin toggles for now -->
 		<section class="admin-pane text-center">
 			<button class="btn variant-filled my-1" on:click={toggleVoting}>
 				<span
 					><i
 						class="fa-solid"
-						class:fa-play={!thisRoom.voting}
-						class:fa-stop={thisRoom.voting}
+						class:fa-play={!$roomState.voting}
+						class:fa-stop={$roomState.voting}
 					/></span
 				>
-				<span>{thisRoom.voting ? 'Stop' : 'Start'} Voting</span>
+				<span>{$roomState.voting ? 'Stop' : 'Start'} Voting</span>
 			</button>
-			<button class="btn variant-filled my-1" on:click={resetVotes}>
-				<span><i class="fa-solid" /></span>
-				<span>Reset Voting</span>
+			<button class="btn variant-filled my-1" on:click={toggleAbstain}>
+				<span
+					><i
+						class="fa-solid"
+						class:fa-user-xmark={!$user.abstaining}
+						class:fa-bolt-lightning={$user.abstaining}
+					/></span
+				>
+				<span>{$user.abstaining ? 'Unabstain' : 'Abstain'}</span>
 			</button>
 		</section>
-	{/if}
 
-	<div class="voting-pane" />
+		<div class="voting-pane" />
 
-	<section class="voting-pane text-center">
-		{#each options as option}
-			<button
-				class="btn btn-sm border-2 variant-filled my-1 mx-[0.5px]"
-				on:click={() => handleVote(option)}
-				class:border-green-400={thisRoom.votes[$user.id] === parseInt(option)}
-				disabled={!thisRoom.voting}
-			>
-				<span>{option === '0' ? '?' : option}</span>
-			</button>
-		{/each}
-	</section>
+		<section class="voting-pane text-center">
+			{#each options as option}
+				<button
+					class="btn btn-sm border-2 variant-filled my-1 mx-[0.5px]"
+					on:click={() => handleVote(option)}
+					class:border-green-400={$user.vote === parseInt(option)}
+					disabled={!$roomState.voting}
+				>
+					<span>{option === '0' ? '?' : option}</span>
+				</button>
+			{/each}
+		</section>
 
-	<section class="results py-4 px-1">
-		<ProgressBar
-			label="Progress Bar"
-			value={Object.values(thisRoom.votes).filter((v) => v > 0).length}
-			max={thisRoom.participants.filter((p) => !p.abstaining).length}
-		/>
-	</section>
+		<!-- this only really works if the votes are reset -->
+		<!-- <section class="results py-4 px-1">
+			<ProgressBar
+				label="Progress Bar"
+				value={[...$roomUsers].filter((_, v) => v.vote > 0).length}
+				max={[...$roomUsers].filter((k, v) => !v.abstaining).length}
+			/>
+		</section> -->
 
-	<section class="participants flex justify-center items-center">
-		{#if thisRoom}
-			{#each thisRoom.participants as participant}
+		<section class="participants flex justify-center items-center">
+			{#each [...$roomUsers] as [_, participant]}
 				<div
 					class="card p-4 border-[1.5px] border-[{participant.color}] m-1"
 					class:border-dotted={participant.abstaining}
@@ -101,16 +108,16 @@
 					<section class="p-4 text-center">
 						{#if participant.abstaining}
 							<i class="fa-solid fa-user-xmark" />
-						{:else if thisRoom.voting}
+						{:else if $roomState.voting}
 							<i class="fa-solid fa-bolt-lightning animate-bounce" />
 						{:else}
-							{thisRoom.votes[participant.id] === 0 ? '?' : thisRoom.votes[participant.id]}
+							{participant.vote === 0 ? '?' : participant.vote}
 						{/if}
 					</section>
 				</div>
 			{/each}
-		{/if}
-	</section>
+		</section>
+	{/if}
 </div>
 
 <style>
