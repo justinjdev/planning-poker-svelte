@@ -10,7 +10,7 @@ const defaultUser: Participant = {
 	name: '',
 	color: '',
 	abstaining: false,
-	vote: -1
+	vote: 0
 };
 
 export function genUser(): Participant {
@@ -20,7 +20,7 @@ export function genUser(): Participant {
 		name: `User ${id.slice(0, 4)}`,
 		color: '#' + Math.floor(Math.random() * 16777215).toString(16),
 		abstaining: false,
-		vote: -1
+		vote: 0
 	};
 
 	return newUser;

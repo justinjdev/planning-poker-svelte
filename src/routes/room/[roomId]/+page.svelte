@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { StateStore } from '$lib/stores/state';
 	import { page } from '$app/stores';
 	import { RoomImpl } from '$lib/room';
 	import { user, type UserMap } from '$lib/stores/user';
@@ -6,10 +7,11 @@
 	import { onDestroy, onMount } from 'svelte';
 
 	const roomId = $page.params.roomId;
-	const options = ['1', '2', '3', '5', '8', '13', '1000', '0'];
+	const options = ['1', '2', '3', '5', '8', '13', '1000', '0'] as const;
 
 	let roomHandler: RoomImpl;
 	let roomUsers: UserMap;
+	let roomState: StateStore;
 
 	const handleVote = (v: string) => {
 		roomHandler.sendVote(parseInt(v));
@@ -31,6 +33,7 @@
 	onMount(() => {
 		roomHandler = new RoomImpl(roomId, $user);
 		roomUsers = roomHandler.users();
+		roomState = roomHandler.state();
 	});
 
 	onDestroy(() => {
@@ -38,8 +41,6 @@
 			roomHandler.leave();
 		}
 	});
-
-	$: roomState = roomHandler?.state();
 </script>
 
 <div class="room-wrapper">
@@ -74,14 +75,14 @@
 			{/each}
 		</section>
 
-		<!-- this only works if the votes are reset -->
+		<!-- this only really works if the votes are reset -->
 		<!-- <section class="results py-4 px-1">
-		<ProgressBar
-			label="Progress Bar"
-			value={Object.values(thisRoom.votes).filter((v) => v > 0).length}
-			max={thisRoom.participants.filter((p) => !p.abstaining).length}
-		/>
-	</section> -->
+			<ProgressBar
+				label="Progress Bar"
+				value={[...$roomUsers].filter((_, v) => v.vote > 0).length}
+				max={[...$roomUsers].filter((k, v) => !v.abstaining).length}
+			/>
+		</section> -->
 
 		<section class="participants flex justify-center items-center">
 			{#each [...$roomUsers] as [_, participant]}
@@ -96,7 +97,7 @@
 						{:else if $roomState.voting}
 							<i class="fa-solid fa-bolt-lightning animate-bounce" />
 						{:else}
-							{participant.vote === 0 ? '?' : participant.vote}
+							{$user.vote === 0 ? '?' : $user.vote}
 						{/if}
 					</section>
 				</div>

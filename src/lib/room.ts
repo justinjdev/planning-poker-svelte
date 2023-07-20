@@ -1,16 +1,8 @@
 import { get } from 'svelte/store';
-import type {
-	LocalState,
-	ManagedState,
-	Participant,
-	RoomState,
-	RoomSync,
-	UserUpdate,
-	UserVote
-} from './interfaces';
+import type { Participant, RoomState, RoomSync, UserUpdate, UserVote } from './interfaces';
 import { RealtimeChannelHandler } from './realtime';
-import { user } from './stores/user';
 import { stateStore, type StateStore } from './stores/state';
+import { user } from './stores/user';
 
 /**
  * what needs to happen in rooms?
@@ -34,7 +26,7 @@ export class RoomImpl {
 	private channelHandler: RealtimeChannelHandler;
 	private userId: string;
 
-	public managedState: StateStore;
+	private managedState: StateStore;
 
 	constructor(roomId: string, initUser: Participant) {
 		this.userId = initUser.id;
@@ -79,6 +71,7 @@ export class RoomImpl {
 				const newTally = userList.reduce((sum, current) => sum + current, 0) / userList.length;
 
 				this.managedState.updateState({ tally: newTally, voting: false });
+				// TODO trigger popUp
 			});
 	}
 
@@ -117,7 +110,10 @@ export class RoomImpl {
 	 */
 	public sendVote(vote: number) {
 		// this.channelHandler.updateSelf;
-		//TODO gotta like. update the user store.
+		this.channelHandler.users().updateUser(this.userId, { vote: vote });
+		user.update((state) => {
+			return { ...state, vote: vote };
+		});
 		this.channelHandler.broadcastEvent<UserVote>('userVote', {
 			userId: this.userId,
 			vote: vote

@@ -10,7 +10,7 @@ import { writable } from 'svelte/store';
 export function eventStore<T>() {
 	const unsubscribe = () => {};
 
-	const { subscribe, update } = writable<T[]>([]);
+	const { subscribe, set, update } = writable<T[]>([]);
 
 	const addEvent = (e: T) => {
 		update((state) => {
