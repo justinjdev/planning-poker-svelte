@@ -22,14 +22,8 @@
 	<svelte:fragment slot="panel">
 		{#if tabSet < 2}
 			<label class="label">
-				<span>Room {tabSet === 0 ? 'Name' : 'ID'}:</span>
-				<input
-					class="input"
-					type="text"
-					placeholder="Room {tabSet === 0 ? 'Name' : 'ID'}"
-					required
-					on:change={handleEntry}
-				/>
+				<span>Room Name</span>
+				<input class="input" type="text" placeholder="Room Name" required on:change={handleEntry} />
 			</label>
 			<button type="button" class="btn variant-filled my-1" on:click|preventDefault={handleSubmit}>
 				<i class="fa-solid fa-rocket" />

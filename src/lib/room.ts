@@ -5,13 +5,15 @@ import { stateStore, type StateStore } from './stores/state';
 import { user } from './stores/user';
 
 /**
+ * room updates:
+ *  [ ] name change
+ *
  * vote triggers:
  *  [ ] tally
  *
  * user updates:
  *  [ ] name change
  *  [ ] color change
- *  [ ] abstain
  *  [ ] vote
  */
 export class RoomImpl {
@@ -27,6 +29,8 @@ export class RoomImpl {
 		this.channelHandler = new RealtimeChannelHandler(roomId, initUser, false);
 
 		this.managedState = stateStore();
+
+		this.managedState.updateState({ name: roomId });
 
 		// subscribe to events
 		this.channelHandler
