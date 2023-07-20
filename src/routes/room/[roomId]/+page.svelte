@@ -97,7 +97,7 @@
 						{:else if $roomState.voting}
 							<i class="fa-solid fa-bolt-lightning animate-bounce" />
 						{:else}
-							{$user.vote === 0 ? '?' : $user.vote}
+							{participant.vote === 0 ? '?' : participant.vote}
 						{/if}
 					</section>
 				</div>
