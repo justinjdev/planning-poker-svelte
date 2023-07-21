@@ -72,7 +72,7 @@
 						class:fa-bolt-lightning={$user.abstaining}
 					/></span
 				>
-				<span>{$user.abstaining ? 'Unabstain' : 'Abstain'}</span>
+				<span>{$user.abstaining ? 'Participate' : 'Watch'}</span>
 			</button>
 		</section>
 
@@ -84,7 +84,7 @@
 					class="btn btn-sm border-2 variant-filled my-1 mx-[0.5px]"
 					on:click={() => handleVote(option)}
 					class:border-green-400={$user.vote === parseInt(option)}
-					disabled={!$roomState.voting}
+					disabled={!$roomState.voting || $user.abstaining}
 				>
 					<span>{option === '0' ? '?' : option}</span>
 				</button>

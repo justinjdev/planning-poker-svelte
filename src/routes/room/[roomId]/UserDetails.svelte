@@ -23,23 +23,24 @@
 
 {#if $userMap.get(userId)}
 	<div
-		class="card p-4 border-[1.5px] border-[{$userMap.get(userId).color}] m-1 w-64 h-32"
+		class="card p-4 border-[1.5px] border-[{$userMap.get(userId)
+			.color}] m-1 w-64 h-32 overflow-hidden"
 		class:border-dotted={$userMap.get(userId).abstaining}
 	>
 		{#if $user.id == userId}
 			<EDiv
 				value={$user.name}
 				handleSubmit={(v) => callback({ id: $user.id, name: v })}
-				dispStyle="card-header h3 text-center align-top"
+				dispStyle="card-header h3 text-center align-top h-14 overflow-y-auto"
 				editStyle="input text-center align-top"
 			/>
 		{:else}
-			<header class="card-header h3 text-center align-top">
+			<header class="card-header h3 text-center align-top h-14">
 				{$userMap.get(userId).name}
 			</header>
 		{/if}
 
-		<section class="p-4 text-center">
+		<section class="p-4 text-center h-16">
 			{#if $userMap.get(userId).abstaining}
 				<i class="fa-solid fa-user-xmark" />
 			{:else if $roomState.voting}
