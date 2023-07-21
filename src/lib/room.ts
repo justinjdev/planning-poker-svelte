@@ -1,8 +1,9 @@
+import { modalStore, type ModalSettings } from '@skeletonlabs/skeleton';
 import { get } from 'svelte/store';
 import type { Participant, RoomState, RoomSync, UserUpdate, UserVote } from './interfaces';
 import { RealtimeChannelHandler } from './realtime';
 import { stateStore, type StateStore } from './stores/state';
-import { user } from './stores/user';
+import { user, type UserMap } from './stores/user';
 
 /**
  * room updates:
@@ -62,14 +63,23 @@ export class RoomImpl {
 			// name change, color change, abstain
 			.handleBroadcastEvent('tally', () => {
 				// this is when we tally & end voting
-
-				const userList = Object.values(get(this.channelHandler.users()));
-				const newTally = userList.reduce((sum, current) => sum + current, 0) / userList.length;
-
-				this.managedState.updateState({ tally: newTally, voting: false });
-				// TODO trigger popUp
+				this.tally();
 			});
 	}
+
+	/**
+	 *
+	 * @param score Helper to get modal settings
+	 * @returns
+	 */
+	private static modalSettings = (score: number): ModalSettings => {
+		return {
+			type: 'alert',
+			title: 'Results',
+			body: score + '',
+			buttonTextCancel: 'Neat!'
+		};
+	};
 
 	/**
 	 * sync the room state with peers
@@ -141,21 +151,42 @@ export class RoomImpl {
 			this.channelHandler.broadcastEvent('startVote', { userId: this.userId });
 		} else {
 			this.channelHandler.broadcastEvent('tally', { userId: this.userId });
+			this.tally();
 		}
+	}
+
+	/**
+	 * Trigger to tally & display votes
+	 */
+	private tally() {
+		const userList = Array.from(get(this.channelHandler.users()).values());
+		const newTally = userList.reduce((sum, current) => sum + current.vote, 0) / userList.length;
+
+		this.managedState.updateState({ tally: newTally, voting: false });
+
+		modalStore.trigger(RoomImpl.modalSettings(newTally));
 	}
 
 	/**
 	 * Unsubscribe from the channel/leave room
 	 */
-	public leave() {
+	public leave(): void {
 		this.channelHandler.leaveChannel();
 	}
 
+	/**
+	 * get the state for the room
+	 * @returns the state for this room
+	 */
 	public state(): StateStore {
 		return this.managedState;
 	}
 
-	public users() {
+	/**
+	 * get a map of id:Participant for the users in the room
+	 * @returns the user map for this room
+	 */
+	public users(): UserMap {
 		return this.channelHandler.users();
 	}
 }

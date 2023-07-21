@@ -1,10 +1,13 @@
 <script lang="ts">
+	import EDiv from '$lib/components/EDiv.svelte';
+	import type { Participant } from '$lib/interfaces';
 	import type { StateStore } from '$lib/stores/state';
-	import type { UserMap } from '$lib/stores/user';
+	import { type UserMap, user } from '$lib/stores/user';
 
 	export let userId: string;
 	export let userMap: UserMap;
 	export let roomState: StateStore;
+	export let callback: (p: Partial<Participant>) => void = () => {};
 
 	const dispMap: Map<string, string> = new Map();
 
@@ -15,22 +18,34 @@
 		return dispMap.get(key) || key;
 	};
 
-	$: thisUser = $userMap.get(userId);
+	console.log('card', userId, $userMap, $roomState);
 </script>
 
-{#if thisUser}
+{#if $userMap.get(userId)}
 	<div
-		class="card p-4 border-[1.5px] border-[{thisUser.color}] m-1"
-		class:border-dotted={thisUser.abstaining}
+		class="card p-4 border-[1.5px] border-[{$userMap.get(userId)}] m-1"
+		class:border-dotted={$userMap.get(userId).abstaining}
 	>
-		<slot />
+		{#if $user.id == userId}
+			<EDiv
+				value={$user.name}
+				handleSubmit={(v) => callback({ id: $user.id, name: v })}
+				dispStyle="card-header h3 text-center align-top"
+				editStyle="input"
+			/>
+		{:else}
+			<header class="card-header h3 text-center align-top">
+				{$userMap.get(userId).name}
+			</header>
+		{/if}
+
 		<section class="p-4 text-center">
-			{#if thisUser.abstaining}
+			{#if $userMap.get(userId)}
 				<i class="fa-solid fa-user-xmark" />
 			{:else if $roomState.voting}
 				<i class="fa-solid fa-bolt-lightning animate-bounce" />
 			{:else}
-				{@html getOrDef(thisUser.vote.toString())}
+				{@html getOrDef($userMap.get(userId).vote.toString())}
 			{/if}
 		</section>
 	</div>
