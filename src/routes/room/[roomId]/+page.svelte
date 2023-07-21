@@ -102,18 +102,15 @@
 
 		<section class="participants flex justify-center items-center w-100">
 			<!-- local user, always first -->
-
-			<!-- <header class="card-header h3 text-center align-top">{$user.name}</header> -->
 			<UserDetails
-				userId={$user.id}
-				userMap={roomUsers}
-				{roomState}
+				participant={$user}
+				voting={$roomState.voting}
 				callback={(p) => roomHandler.updateCurrentUser(p)}
 			/>
 
-			{#each [...$roomUsers] as [id, _]}
+			{#each [...$roomUsers] as [id, v] (id)}
 				{#if id !== $user.id}
-					<UserDetails userId={id} userMap={roomUsers} {roomState} />
+					<UserDetails participant={v} voting={$roomState.voting} />
 				{/if}
 			{/each}
 		</section>

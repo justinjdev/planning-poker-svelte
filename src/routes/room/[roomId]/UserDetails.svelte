@@ -1,12 +1,10 @@
 <script lang="ts">
 	import EDiv from '$lib/components/EDiv.svelte';
 	import type { Participant } from '$lib/interfaces';
-	import type { StateStore } from '$lib/stores/state';
-	import { type UserMap, user } from '$lib/stores/user';
+	import { user } from '$lib/stores/user';
 
-	export let userId: string;
-	export let userMap: UserMap;
-	export let roomState: StateStore;
+	export let participant: Participant;
+	export let voting: boolean = false;
 	export let callback: (p: Partial<Participant>) => void = () => {};
 
 	const dispMap: Map<string, string> = new Map();
@@ -17,43 +15,33 @@
 	const getOrDef = (key: string) => {
 		return dispMap.get(key) || key;
 	};
-
-	console.log('card', userId, $userMap, $roomState);
 </script>
 
-{#if $userMap.get(userId)}
-	<div
-		class="card p-4 border-[1.5px] border-[{$userMap.get(userId)
-			.color}] m-1 w-64 h-32 overflow-hidden"
-		class:border-dotted={$userMap.get(userId).abstaining}
-	>
-		{#if $user.id == userId}
-			<EDiv
-				value={$user.name}
-				handleSubmit={(v) => callback({ id: $user.id, name: v })}
-				dispStyle="card-header h3 text-center align-top h-14 overflow-y-auto"
-				editStyle="input text-center align-top"
-			/>
+<div
+	class="card p-4 border-[1.5px]
+            m-1 w-64 h-32 overflow-hidden border-[{participant.color}] bg-[{participant.color}]"
+	class:border-dotted={participant.abstaining}
+>
+	{#if $user.id == participant.id}
+		<EDiv
+			value={participant.name}
+			handleSubmit={(v) => callback({ id: participant.id, name: v })}
+			dispStyle="card-header h3 text-center align-top h-14 overflow-y-auto"
+			editStyle="input text-center align-top"
+		/>
+	{:else}
+		<header class="card-header h3 text-center align-top h-14">
+			{participant.name}
+		</header>
+	{/if}
+
+	<section class="p-4 text-center h-16">
+		{#if participant.abstaining}
+			<i class="fa-solid fa-user-xmark" />
+		{:else if voting}
+			<i class="fa-solid fa-bolt-lightning animate-bounce" />
 		{:else}
-			<header class="card-header h3 text-center align-top h-14">
-				{$userMap.get(userId).name}
-			</header>
+			{@html getOrDef(participant.vote.toString())}
 		{/if}
-
-		<section class="p-4 text-center h-16">
-			{#if $userMap.get(userId).abstaining}
-				<i class="fa-solid fa-user-xmark" />
-			{:else if $roomState.voting}
-				<i class="fa-solid fa-bolt-lightning animate-bounce" />
-			{:else}
-				{@html getOrDef($userMap.get(userId).vote.toString())}
-			{/if}
-		</section>
-	</div>
-{/if}
-
-<style>
-	.spinner {
-		animation: spin 1s linear infinite;
-	}
-</style>
+	</section>
+</div>
