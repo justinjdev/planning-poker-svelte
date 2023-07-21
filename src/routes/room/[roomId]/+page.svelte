@@ -1,10 +1,11 @@
 <script lang="ts">
-	import type { StateStore } from '$lib/stores/state';
 	import { page } from '$app/stores';
 	import { RoomImpl } from '$lib/room';
+	import type { StateStore } from '$lib/stores/state';
 	import { user, type UserMap } from '$lib/stores/user';
-	import type { ModalSettings } from '@skeletonlabs/skeleton';
+	import { Modal, type ModalSettings } from '@skeletonlabs/skeleton';
 	import { onDestroy, onMount } from 'svelte';
+	import UserDetails from './UserDetails.svelte';
 
 	const roomId = $page.params.roomId;
 	const options = ['1', '2', '3', '5', '8', '13', '1000', '0'] as const;
@@ -48,6 +49,7 @@
 </script>
 
 <div class="room-wrapper">
+	<Modal {modalSettings} />
 	{#if roomHandler}
 		<h1 class="text-center">Welcome to {$roomState.name}</h1>
 		<!-- not handling admin toggles for now -->
@@ -98,30 +100,22 @@
 			/>
 		</section> -->
 
-		<section class="participants flex justify-center items-center">
-			{#each [...$roomUsers] as [_, participant]}
-				<div
-					class="card p-4 border-[1.5px] border-[{participant.color}] m-1"
-					class:border-dotted={participant.abstaining}
-				>
-					<header class="card-header h3 text-center align-top">{participant.name}</header>
-					<section class="p-4 text-center">
-						{#if participant.abstaining}
-							<i class="fa-solid fa-user-xmark" />
-						{:else if $roomState.voting}
-							<i class="fa-solid fa-bolt-lightning animate-bounce" />
-						{:else}
-							{participant.vote === 0 ? '?' : participant.vote}
-						{/if}
-					</section>
-				</div>
+		<section class="participants flex justify-center items-center w-100">
+			<!-- local user, always first -->
+
+			<!-- <header class="card-header h3 text-center align-top">{$user.name}</header> -->
+			<UserDetails
+				userId={$user.id}
+				userMap={roomUsers}
+				{roomState}
+				callback={(p) => roomHandler.updateCurrentUser(p)}
+			/>
+
+			{#each [...$roomUsers] as [id, _]}
+				{#if id !== $user.id}
+					<UserDetails userId={id} userMap={roomUsers} {roomState} />
+				{/if}
 			{/each}
 		</section>
 	{/if}
 </div>
-
-<style>
-	.spinner {
-		animation: spin 1s linear infinite;
-	}
-</style>
