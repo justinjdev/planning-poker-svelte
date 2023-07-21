@@ -23,7 +23,7 @@
 
 {#if $userMap.get(userId)}
 	<div
-		class="card p-4 border-[1.5px] border-[{$userMap.get(userId)}] m-1"
+		class="card p-4 border-[1.5px] border-[{$userMap.get(userId).color}] m-1 w-64 h-32"
 		class:border-dotted={$userMap.get(userId).abstaining}
 	>
 		{#if $user.id == userId}
@@ -31,7 +31,7 @@
 				value={$user.name}
 				handleSubmit={(v) => callback({ id: $user.id, name: v })}
 				dispStyle="card-header h3 text-center align-top"
-				editStyle="input"
+				editStyle="input text-center align-top"
 			/>
 		{:else}
 			<header class="card-header h3 text-center align-top">
