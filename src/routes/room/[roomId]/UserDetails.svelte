@@ -40,7 +40,7 @@
 		{/if}
 
 		<section class="p-4 text-center">
-			{#if $userMap.get(userId)}
+			{#if $userMap.get(userId).abstaining}
 				<i class="fa-solid fa-user-xmark" />
 			{:else if $roomState.voting}
 				<i class="fa-solid fa-bolt-lightning animate-bounce" />

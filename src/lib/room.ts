@@ -160,7 +160,9 @@ export class RoomImpl {
 	 */
 	private tally() {
 		const userList = Array.from(get(this.channelHandler.users()).values());
-		const newTally = userList.reduce((sum, current) => sum + current.vote, 0) / userList.length;
+		const newTally =
+			userList.filter((p) => p.vote > 0).reduce((sum, current) => sum + current.vote, 0) /
+			userList.length;
 
 		this.managedState.updateState({ tally: newTally, voting: false });
 
