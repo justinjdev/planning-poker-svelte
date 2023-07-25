@@ -1,9 +1,16 @@
 import { modalStore, type ModalSettings } from '@skeletonlabs/skeleton';
 import { get } from 'svelte/store';
-import type { Participant, RoomState, RoomSync, UserUpdate, UserVote } from './interfaces';
+import type {
+	Participant,
+	Rolecall,
+	RoomState,
+	RoomSync,
+	UserUpdate,
+	UserVote
+} from './interfaces';
 import { RealtimeChannelHandler } from './realtime';
 import { stateStore, type StateStore } from './stores/state';
-import { user, type UserMap } from './stores/user';
+import { genUser, user, type UserMap } from './stores/user';
 
 /**
  * room updates:
@@ -64,6 +71,17 @@ export class RoomImpl {
 			.handleBroadcastEvent('tally', () => {
 				// this is when we tally & end voting
 				this.tally();
+			})
+			.handleBroadcastEvent<Rolecall>('rolecall', () => {
+				// respond to rolecall request
+				this.channelHandler.broadcastEvent('present', {
+					userId: this.userId,
+					user: get(user)
+				});
+			})
+			.handleBroadcastEvent<Rolecall>('present', (r: Rolecall) => {
+				// handle present response for request
+				this.channelHandler.addUserToChannel(r.user);
 			});
 	}
 
@@ -190,5 +208,22 @@ export class RoomImpl {
 	 */
 	public users(): UserMap {
 		return this.channelHandler.users();
+	}
+
+	/**
+	 * request rolecall & prepare
+	 */
+	public rolecall() {
+		this.channelHandler.broadcastEvent('rolecall', { userId: this.userId });
+		this.channelHandler.users().clearAllButCurrent(get(user));
+	}
+
+	/**
+	 *
+	 */
+	public addRandomUser() {
+		const user = genUser();
+
+		this.channelHandler.users().addUser(user.id, user);
 	}
 }

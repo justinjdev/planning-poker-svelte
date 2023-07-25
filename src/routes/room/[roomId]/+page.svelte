@@ -8,6 +8,8 @@
 	import UserDetails from './UserDetails.svelte';
 
 	const roomId = $page.params.roomId;
+	const testMode = $page.url.searchParams.get('test') === 'true';
+
 	const options = ['1', '2', '3', '5', '8', '13', '1000', '0'] as const;
 
 	let roomHandler: RoomImpl;
@@ -53,6 +55,20 @@
 	{#if roomHandler}
 		<h1 class="text-center">Welcome to {$roomState.name}</h1>
 		<!-- not handling admin toggles for now -->
+		{#if testMode}
+			<button
+				type="button"
+				class="btn text-center variant-filled"
+				on:click|preventDefault={() => roomHandler.addRandomUser()}>Add user</button
+			>
+			<button type="button" class="btn text-center variant-filled">Remove user</button>
+			<button type="button" class="btn text-center variant-filled">Randomize all colors</button>
+			<button
+				type="button"
+				class="btn text-center variant-filled"
+				on:click={() => roomHandler.rolecall()}>Rolecall</button
+			>
+		{/if}
 		<section class="admin-pane text-center">
 			<button class="btn variant-filled my-1" on:click={toggleVoting}>
 				<span

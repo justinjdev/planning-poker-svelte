@@ -125,9 +125,20 @@ export const userMap = () => {
 		});
 	};
 
+	const clearAllButCurrent = (current: Participant) => {
+		update((state) => {
+			state.clear();
+			if (current) {
+				state.set(current.id, current);
+			}
+			return state;
+		});
+	};
+
 	return {
 		subscribe,
 		addUser,
+		clearAllButCurrent,
 		updateUser,
 		removeUserById,
 		unsubscribe
