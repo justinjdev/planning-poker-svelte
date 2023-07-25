@@ -12,6 +12,13 @@
 	const handleEntry = (e: Event) => {
 		roomName = e.target.value;
 	};
+
+	function handleKey(event: KeyboardEvent) {
+		if (event.key == 'Enter') {
+			event.preventDefault();
+			handleSubmit();
+		}
+	}
 </script>
 
 <TabGroup class="w-80 my-10 py-2 px-5 border rounded">
@@ -23,7 +30,14 @@
 		{#if tabSet < 2}
 			<label class="label">
 				<span>Room Name</span>
-				<input class="input" type="text" placeholder="Room Name" required on:change={handleEntry} />
+				<input
+					class="input"
+					type="text"
+					placeholder="Room Name"
+					required
+					on:change={handleEntry}
+					on:keyup={handleKey}
+				/>
 			</label>
 			<button type="button" class="btn variant-filled my-1" on:click|preventDefault={handleSubmit}>
 				<i class="fa-solid fa-rocket" />
