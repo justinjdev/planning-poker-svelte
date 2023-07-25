@@ -61,8 +61,6 @@
 				class="btn text-center variant-filled"
 				on:click|preventDefault={() => roomHandler.addRandomUser()}>Add user</button
 			>
-			<button type="button" class="btn text-center variant-filled">Remove user</button>
-			<button type="button" class="btn text-center variant-filled">Randomize all colors</button>
 			<button
 				type="button"
 				class="btn text-center variant-filled"
