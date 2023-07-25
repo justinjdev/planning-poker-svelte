@@ -38,3 +38,7 @@ export interface UserUpdate extends BroadcastEvent {
 	color: string;
 	abstaining: boolean;
 }
+
+export interface Rolecall extends BroadcastEvent {
+	user: Participant;
+}

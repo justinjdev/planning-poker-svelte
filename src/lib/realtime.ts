@@ -105,6 +105,10 @@ export class RealtimeChannelHandler {
 		return this;
 	}
 
+	public addUserToChannel(user: Participant) {
+		this.channelUsers.addUser(user.id, user);
+	}
+
 	/**
 	 * Broadcasts an event to the channel with specified payload
 	 * @param trackedEvent the event to broadcast
