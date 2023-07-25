@@ -11,16 +11,24 @@
 
 	dispMap.set('-1', '<i class="fa-solid fa-x" />');
 	dispMap.set('0', '<i class="fa-solid fa-question" />');
+	dispMap.set('13', '<i class="fa-solid fa-1"></i><i class="fa-solid fa-3"></i>');
+	dispMap.set(
+		'1000',
+		'<i class="fa-solid fa-1"></i><i class="fa-solid fa-0"></i></i><i class="fa-solid fa-0"></i></i><i class="fa-solid fa-0"></i>'
+	);
+
+	const numIcon = '<i class="fa-solid fa-?"></i>';
 
 	const getOrDef = (key: string) => {
-		return dispMap.get(key) || key;
+		return dispMap.get(key) || numIcon.replace('?', key);
 	};
 </script>
 
 <div
 	class="card p-4 border-[1.5px]
-            m-1 w-64 h-32 overflow-hidden border-[{participant.color}] bg-[{participant.color}]"
+            m-1 w-64 h-40 overflow-hidden border-[var(--border-color)] relative"
 	class:border-dotted={participant.abstaining}
+	style="--border-color: {participant.color}"
 >
 	{#if $user.id == participant.id}
 		<EDiv
@@ -35,7 +43,7 @@
 		</header>
 	{/if}
 
-	<section class="p-4 text-center h-16">
+	<section class="p-4 text-center h-16 absolute inset-x-0 bottom-0">
 		{#if participant.abstaining}
 			<i class="fa-solid fa-user-xmark" />
 		{:else if voting}
@@ -45,3 +53,6 @@
 		{/if}
 	</section>
 </div>
+
+<style>
+</style>

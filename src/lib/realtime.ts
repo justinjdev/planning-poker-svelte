@@ -4,6 +4,7 @@ import type { BroadcastEvent, Participant, UserUpdate } from './interfaces';
 import { eventStore, type EventStore } from './stores/event';
 import { user, userMap, type UserMap } from './stores/user';
 import { supabaseClient } from './supabase';
+import { triggerToast } from './utils';
 
 /**
  * Creates and manages a realtime channel
@@ -47,10 +48,13 @@ export class RealtimeChannelHandler {
 			// using the key as the id as that's how I remove // consistency
 			.on('presence', { event: 'join' }, ({ key, newPresences }) => {
 				this.channelUsers.addUser(key, newPresences[0]['user_data']);
+				triggerToast(`${newPresences[0]['user_data'].name} joined the room!`);
 			})
 			// handle leaving => remove from map by key
 			.on('presence', { event: 'leave' }, ({ key }) => {
+				const name = get(this.channelUsers).get(key)!.name;
 				this.channelUsers.removeUserById(key);
+				triggerToast(`${name} left the room!`);
 			})
 			.on('broadcast', { event: 'userSync' }, ({ payload }) => {
 				this.channelUsers.updateUser(payload.userId, payload as Partial<UserUpdate>);

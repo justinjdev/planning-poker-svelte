@@ -5,12 +5,14 @@ import type {
 	Rolecall,
 	RoomState,
 	RoomSync,
+	UserReaction,
 	UserUpdate,
 	UserVote
 } from './interfaces';
 import { RealtimeChannelHandler } from './realtime';
 import { stateStore, type StateStore } from './stores/state';
 import { genUser, user, type UserMap } from './stores/user';
+import { mapStore } from './stores/event';
 
 /**
  * room updates:
@@ -30,6 +32,8 @@ export class RoomImpl {
 
 	private managedState: StateStore;
 
+	private reactionMap;
+
 	constructor(roomId: string, initUser: Participant) {
 		this.userId = initUser.id;
 
@@ -39,6 +43,8 @@ export class RoomImpl {
 		this.managedState = stateStore();
 
 		this.managedState.updateState({ name: roomId });
+
+		this.reactionMap = mapStore<string>();
 
 		// subscribe to events
 		this.channelHandler
@@ -82,6 +88,10 @@ export class RoomImpl {
 			.handleBroadcastEvent<Rolecall>('present', (r: Rolecall) => {
 				// handle present response for request
 				this.channelHandler.addUserToChannel(r.user);
+			})
+			.handleBroadcastEvent<UserReaction>('reaction', (ur: UserReaction) => {
+				// need to like...pop a modal or something here
+				console.log('reaction', ur);
 			});
 	}
 
@@ -219,11 +229,19 @@ export class RoomImpl {
 	}
 
 	/**
-	 *
+	 * add a random user. only works locally for testing.
 	 */
 	public addRandomUser() {
 		const user = genUser();
 
 		this.channelHandler.users().addUser(user.id, user);
+	}
+
+	/**
+	 * send a reaction to peers
+	 * @param u reaction event to broadcast
+	 */
+	public sendReaction(u: UserReaction) {
+		this.channelHandler.broadcastEvent('reaction', u);
 	}
 }

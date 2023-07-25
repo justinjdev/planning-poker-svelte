@@ -1,5 +1,4 @@
-import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public';
-import { createClient } from '@supabase/supabase-js';
+import { toastStore } from '@skeletonlabs/skeleton';
 
 // copilot generated this, I assume it's not egregious but it's not great either
 export function uuid() {
@@ -7,5 +6,11 @@ export function uuid() {
 		let r = (Math.random() * 16) | 0,
 			v = c === 'x' ? r : (r & 0x3) | 0x8;
 		return v.toString(16);
+	});
+}
+
+export function triggerToast(m: string) {
+	toastStore.trigger({
+		message: m
 	});
 }
