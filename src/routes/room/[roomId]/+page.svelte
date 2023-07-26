@@ -100,7 +100,7 @@
 
 		<div class="voting-pane" />
 
-		<section class="reaction-pane text-center">
+		<!-- <section class="reaction-pane text-center">
 			{#each reactions as reaction}
 				<button
 					class="btn btn-sm border-2 variant-filled my-1 mx-[0.5px]"
@@ -109,7 +109,7 @@
 					<span>{reaction}</span>
 				</button>
 			{/each}
-		</section>
+		</section> -->
 		<section class="voting-pane text-center">
 			{#each options as option}
 				<button
