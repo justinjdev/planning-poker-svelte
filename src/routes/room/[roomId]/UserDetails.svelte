@@ -35,7 +35,7 @@
 			value={participant.name}
 			handleSubmit={(v) => callback({ id: participant.id, name: v })}
 			dispStyle="card-header h3 text-center align-top h-14 overflow-y-auto"
-			editStyle="input text-center align-top"
+			editStyle="input text-center align-top mt-5"
 		/>
 	{:else}
 		<header class="card-header h3 text-center align-top h-14">
