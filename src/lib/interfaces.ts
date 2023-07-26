@@ -29,6 +29,10 @@ export type ManagedState = RoomState & LocalState;
 // a room sync will sync all room state
 export type RoomSync = RoomState & BroadcastEvent;
 
+export interface UserReaction extends BroadcastEvent {
+	reaction: string;
+}
+
 export interface UserVote extends BroadcastEvent {
 	vote: number;
 }

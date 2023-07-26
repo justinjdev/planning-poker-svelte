@@ -11,6 +11,7 @@
 	const testMode = $page.url.searchParams.get('test') === 'true';
 
 	const options = ['1', '2', '3', '5', '8', '13', '1000', '0'] as const;
+	const reactions = ['👍', '👎', '👋', '🥳', '🚀', '😭'] as const;
 
 	let roomHandler: RoomImpl;
 	let roomUsers: UserMap;
@@ -26,6 +27,13 @@
 
 	const toggleAbstain = () => {
 		roomHandler.toggleAbstain();
+	};
+
+	const handleReaction = (s: string) => {
+		roomHandler.sendReaction({
+			reaction: s,
+			userId: $user.id
+		});
 	};
 
 	const modalSettings = (score: number): ModalSettings => {
@@ -92,6 +100,16 @@
 
 		<div class="voting-pane" />
 
+		<!-- <section class="reaction-pane text-center">
+			{#each reactions as reaction}
+				<button
+					class="btn btn-sm border-2 variant-filled my-1 mx-[0.5px]"
+					on:click={() => handleReaction(reaction)}
+				>
+					<span>{reaction}</span>
+				</button>
+			{/each}
+		</section> -->
 		<section class="voting-pane text-center">
 			{#each options as option}
 				<button
