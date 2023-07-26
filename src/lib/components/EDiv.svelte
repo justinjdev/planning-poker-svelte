@@ -28,7 +28,7 @@
 </script>
 
 {#if editing}
-	<form on:submit|preventDefault={submit} on:keydown={keydown}>
+	<form on:submit|preventDefault={submit} on:keydown={keydown} class="pt-5">
 		<input bind:value required use:focus on:blur={submit} class={editStyle} />
 	</form>
 {:else}
