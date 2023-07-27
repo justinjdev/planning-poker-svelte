@@ -29,7 +29,7 @@
 
 {#if editing}
 	<form on:submit|preventDefault={submit} on:keydown={keydown}>
-		<input bind:value required use:focus on:blur={submit} class={editStyle} />
+		<input bind:value required use:focus on:blur={submit} class={editStyle} maxlength="15" />
 	</form>
 {:else}
 	<!-- svelte-ignore a11y-click-events-have-key-events -->

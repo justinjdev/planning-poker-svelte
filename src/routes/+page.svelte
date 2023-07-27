@@ -34,6 +34,7 @@
 					class="input"
 					type="text"
 					placeholder="Room Name"
+					maxlength="15"
 					required
 					on:change={handleEntry}
 					on:keyup={handleKey}
