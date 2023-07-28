@@ -1,7 +1,6 @@
 # TODO
-- supabase
-- fix border colors on cards
-- move remaining store updating logic into stores
+- room passwords
+- db support?
 
 ## Developing
 
