@@ -1,4 +1,10 @@
-# TODO
+# Planning Poker
+----------
+This is an implementation of a simple Planning Poker app that was built with [SkeletonUI](https://www.skeleton.dev/) (Sveltekit & TailwindCSS) and [Supabase](https://supabase.com/) that was inspired by a simple React app created by [mpaulweeks](https://github.com/mpaulweeks/planning-poker).  
+
+This implementation uses Supabase's [Realtime APIs](https://supabase.com/docs/guides/realtime) (essentially websockets) and avoids data persistence and does not require auth. Due to this approach, a few compromises were made with the way state was managed. The room and realtime code could also probably use some cleaning up...and someday tests.  
+
+## TODO
 - room passwords
 - db support?
 
