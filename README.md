@@ -4,6 +4,8 @@ This is an implementation of a simple Planning Poker app that was built with [Sk
 
 This implementation uses Supabase's [Realtime APIs](https://supabase.com/docs/guides/realtime) (essentially websockets) and avoids data persistence and does not require auth. Due to this approach, a few compromises were made with the way state was managed. The room and realtime code could also probably use some cleaning up...and someday tests.  
 
+I will also note that Supabase does not seem to think Realtime usage counts as activity, so they routinely shutdown my free Supabase cloud instance - so I cannot always promise the deployed version will be working :)  
+
 ## TODO
 - room passwords
 - db support?
